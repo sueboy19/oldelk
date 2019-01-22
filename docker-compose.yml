@@ -1,0 +1,97 @@
+version: '3.3'
+
+services:
+  #go-ethereum-node1:
+  #  build:
+  #    context: go-ethereum-node1/
+  #  volumes:
+  #    #- ./go-ethereum/keystore:/root/.ethereum/devchain/keystore:rw
+  #    - ./go-ethereum-node1/genesis/poa_for_dev.json:/root/genesis/poa_for_dev.json:ro
+  #    - alldata:/root/.ethereum/devchain
+  #    - /etc/localtime:/etc/localtime:ro
+  #    #- ./go-ethereum/log:/root/log:rw
+  #    - alldata:/root/output:rw
+  #  entrypoint: /root/start.sh
+  #  ports:
+  #    - "18545:8545"
+  #    - "30313:30303"
+  #    - "30313:30303/udp"
+  #  networks:
+  #    - fastdev
+  
+  #ethereum_etl:
+  #  build:
+  #    context: ethereum-etl/
+  #  env_file: .env
+  #  volumes:
+  #    - alldata:/ethereum-etl/output:rw
+  #    #- /root/go/src/github.com/ethereum/go-ethereum/build/bin/data:/ethereum-etl/ipc
+  #  #restart: unless-stopped
+  #  networks:
+  #    - fastdev
+
+  elasticsearch:
+    build:
+      context: elasticsearch/
+    volumes:
+      #- ./elasticsearch/esdata:/usr/share/elasticsearch/data:rw
+      - alldata:/usr/share/elasticsearch/data:rw
+      #- ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    networks:
+      - fastdev
+
+  logstash:
+    build:
+      context: logstash/
+    volumes:
+      - ./logstash/config/logstash.yml:/etc/logstash/logstash.yml:ro
+      - ./logstash/pipeline:/etc/logstash/conf.d:ro
+    ports:
+      - "5000:5000"
+      - "5044:5044"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - fastdev
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: kibana/
+    volumes:
+      - ./kibana/config/:/usr/share/kibana/config:ro
+    ports:
+      - "5601:5601"
+    networks:
+      - fastdev
+    depends_on:
+      - elasticsearch
+
+  fakelog:
+    build:
+      context: fakelog/
+    volumes:
+      - ./fakelog/logs:/ethereum-etl/output/:rw
+    networks:
+      - fastdev
+
+volumes:  
+  alldata: 
+
+networks:
+  fastdev:
+    driver: bridge

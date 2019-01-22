@@ -1,0 +1,84 @@
+filebeat.prospectors:
+
+- type: log
+  paths:
+    - /src/app/logs/*.log
+  exclude_files: ['.gz$', 'geth.log']
+  tags: ["xxx.xxx.xxx.xxx"]
+  fields:
+    filebeatserverip: "xxx.xxx.xxx.xxx"
+  fields_under_root: true
+
+- type: log
+  paths:
+    - /ethereum-etl/output/blocks/*/*/*.csv
+  exclude_files: ['.gz$']
+  fields:
+    srctype: "etl"
+    etltype: "blocks"
+    filebeatserverip: "cert"
+  fields_under_root: true
+
+- type: log
+  paths:
+    - /ethereum-etl/output/contracts/*/*/*.csv
+  exclude_files: ['.gz$']
+  fields:
+    srctype: "etl"
+    etltype: "contracts"
+    filebeatserverip: "cert"
+  fields_under_root: true
+
+- type: log
+  paths:
+    - /ethereum-etl/output/logs/*/*/*.csv
+  exclude_files: ['.gz$']
+  fields:
+    srctype: "etl"
+    etltype: "logs"
+    filebeatserverip: "cert"
+  fields_under_root: true
+
+- type: log
+  paths:
+    - /ethereum-etl/output/receipts/*/*/*.csv
+  exclude_files: ['.gz$']
+  fields:
+    srctype: "etl"
+    etltype: "receipts"
+    filebeatserverip: "cert"
+  fields_under_root: true
+
+- type: log
+  paths:
+    - /ethereum-etl/output/token_transfers/*/*/*.csv
+  exclude_files: ['.gz$']
+  fields:
+    srctype: "etl"
+    etltype: "token_transfers"
+    filebeatserverip: "cert"
+  fields_under_root: true
+
+- type: log
+  paths:
+    - /ethereum-etl/output/tokens/*/*/*.csv
+  exclude_files: ['.gz$']
+  fields:
+    srctype: "etl"
+    etltype: "tokens"
+    filebeatserverip: "cert"
+  fields_under_root: true
+
+- type: log
+  paths:
+    - /ethereum-etl/output/transactions/*/*/*.csv
+  exclude_files: ['.gz$']
+  fields:
+    srctype: "etl"
+    etltype: "transactions"
+    filebeatserverip: "cert"
+  fields_under_root: true
+
+
+output.logstash:
+  hosts: ["logstash:5044"]
